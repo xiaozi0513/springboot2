@@ -1,4 +1,4 @@
-package com.wh.modules.demo.controller;
+package com.wh.demo;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -14,7 +14,8 @@ public class HelloController {
 
     @RequestMapping("/demo/hello")
     public String hello() {
-        return "Hello, Spring Boot 2.0";
+        int a = 1/0;
+        return "Hello, Spring Boot 2.0.4";
     }
 
 }

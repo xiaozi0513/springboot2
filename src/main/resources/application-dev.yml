@@ -1,0 +1,61 @@
+#tomcat
+server:
+  port: 8088
+  servlet:
+    context-path: /
+  tomcat:
+    uri-encoding: UTF-8
+    max-threads: 1000
+    min-spare-threads: 5
+
+spring:
+  application:
+    name: springboot2-dev
+  #multi datasource
+  datasource:
+    dynamic:
+      primary: master
+      datasource:
+        master:
+          type: com.alibaba.druid.pool.DruidDataSource
+          driver-class-name: com.mysql.cj.jdbc.Driver
+          url: jdbc:mysql://localhost:3306/a_master?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf8&autoReconnect=true&useSSL=false
+          username: root
+          password: root1234
+          initial-size: 10
+          max-active: 100
+          min-idle: 10
+          max-wait: 60000
+          pool-prepared-statements: true
+          max-pool-prepared-statement-per-connection-size: 20
+          time-between-eviction-runs-millis: 60000
+          min-evictable-idle-time-millis: 300000
+          validation-query: SELECT 1
+          test-while-idle: true
+          test-on-borrow: false
+          test-on-return: false
+        a_slave1:
+          type: com.alibaba.druid.pool.DruidDataSource
+          driver-class-name: com.mysql.cj.jdbc.Driver
+          url: jdbc:mysql://localhost:3306/a_salve_1?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf8&autoReconnect=true&useSSL=false
+          username: root
+          password: root1234
+        a_slave2:
+          type: com.alibaba.druid.pool.DruidDataSource
+          driver-class-name: com.mysql.cj.jdbc.Driver
+          url: jdbc:mysql://localhost:3306/a_salve_2?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf8&autoReconnect=true&useSSL=false
+          username: root
+          password: root1234
+        b:
+          driver-class-name: com.mysql.cj.jdbc.Driver
+          url: jdbc:mysql://localhost:3306/b_master?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf8&autoReconnect=true&useSSL=false
+          username: root
+          password: root1234
+
+#mybatis-plus
+mybatis-plus:
+  mapper-locations: classpath:mapper/**/*.xml
+  type-aliases-package: com.wh.modules.*.mapper.domain
+  configuration:
+    map-underscore-to-camel-case: true #下划线转驼峰
+
