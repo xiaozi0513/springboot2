@@ -1,7 +1,12 @@
 package com.wh.demo;
 
+import com.wh.mapper.axx.domain.User;
+import com.wh.mapper.bxx.domain.Book;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 /**
  * Hello Spring Boot 2.0
@@ -12,9 +17,15 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class HelloController {
 
+    @Autowired
+    private HelloService helloService;
+
     @RequestMapping("/demo/hello")
     public String hello() {
-        int a = 1/0;
+        List<User> userList = helloService.selectAll();
+        System.out.println("=====" + userList.size());
+        Book book = helloService.selectById(1L);
+        System.out.println(">>>>>" + book.toString());
         return "Hello, Spring Boot 2.0.4";
     }
 

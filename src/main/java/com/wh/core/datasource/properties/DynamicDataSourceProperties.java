@@ -7,6 +7,7 @@ import org.springframework.core.Ordered;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Properties;
 
 /**
  * 动态数据源属性
@@ -26,7 +27,7 @@ public class DynamicDataSourceProperties {
     /**
      * 多数据源
      */
-    private Map<String, DataSourceProperty> datasource = new LinkedHashMap<>();
+    private Map<String, Properties> datasource = new LinkedHashMap<>();
 
     /**
      * 多数据源选择算法clazz，默认负载均衡算法

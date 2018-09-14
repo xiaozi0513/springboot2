@@ -1,7 +1,8 @@
 package com.wh.core.datasource;
 
-import com.alibaba.druid.spring.boot.autoconfigure.DruidDataSourceBuilder;
-import org.springframework.boot.context.properties.ConfigurationProperties;
+import com.wh.core.datasource.properties.DynamicDataSourceProperties;
+import com.wh.core.datasource.provider.DynamicDataSourceProvider;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -17,45 +18,33 @@ import java.util.Map;
  * @date: 2018/9/12 下午7:46
  */
 @Configuration
+@EnableConfigurationProperties(DynamicDataSourceProperties.class)
 public class DataSourceConfigurer {
 
-    @Bean(name = "aMasterDataSource", initMethod = "init", destroyMethod = "close")
-    @ConfigurationProperties(prefix = "spring.datasource.druid.a_master")
-    public DataSource aMasterDataSource() {
-        return DruidDataSourceBuilder.create().build();
+    private final DynamicDataSourceProperties properties;
+
+    public DataSourceConfigurer(DynamicDataSourceProperties properties) {
+        this.properties = properties;
     }
 
-    @Bean(name = "aSlave1DataSource", initMethod = "init", destroyMethod = "close")
-    @ConfigurationProperties(prefix = "spring.datasource.druid.a_slave_1")
-    public DataSource aSlave1DataSource() {
-        return DruidDataSourceBuilder.create().build();
-    }
-
-    @Bean(name = "aSlave2DataSource", initMethod = "init", destroyMethod = "close")
-    @ConfigurationProperties(prefix = "spring.datasource.druid.a_slave_2")
-    public DataSource aSlave2DataSource() {
-        return DruidDataSourceBuilder.create().build();
-    }
-
-    @Bean(name = "bMasterDataSource", initMethod = "init", destroyMethod = "close")
-    @ConfigurationProperties(prefix = "spring.datasource.druid.b_master")
-    public DataSource bMasterDataSource() {
-        return DruidDataSourceBuilder.create().build();
+    @Bean(name = "dynamicDataSourceProvider")
+    public DynamicDataSourceProvider dynamicDataSourceProvider() {
+        return new DynamicDataSourceProvider(properties);
     }
 
     @Bean(name = "dynamicDataSource")
     @Primary
-    public DataSource dynamicDataSource() {
-        Map<Object, Object> dataSourceMap = new HashMap<>();
-        dataSourceMap.put(DataSourceKey.A_MASTER.name(), aMasterDataSource());
-        dataSourceMap.put(DataSourceKey.A_SLAVE_1.name(), aSlave1DataSource());
-        dataSourceMap.put(DataSourceKey.A_SLAVE_2.name(), aSlave2DataSource());
-        dataSourceMap.put(DataSourceKey.B_MASTER.name(), bMasterDataSource());
+    public DataSource dynamicDataSource(DynamicDataSourceProvider provider) {
+        Map<String, DataSource> dataSourceMap = provider.loadDataSources();
+        Map<Object, Object> targetDataSources = new HashMap<>();
+        for (Map.Entry<String, DataSource> item : dataSourceMap.entrySet()) {
+            targetDataSources.put(item.getKey(), item.getValue());
+        }
 
         DynamicDataSource dynamicDataSource = new DynamicDataSource();
         //将a_master数据源作为默认数据源
-        dynamicDataSource.setDefaultTargetDataSource(aMasterDataSource());
-        dynamicDataSource.setTargetDataSources(dataSourceMap);
+        dynamicDataSource.setDefaultTargetDataSource(targetDataSources.get(properties.getPrimary()));
+        dynamicDataSource.setTargetDataSources(targetDataSources);
 
         //将所有数据源的key添加到数据源上下文key集合中，用户切换数据源时判断数据源是否有效
         DynamicDataSourceContextHolder.dataSourceKeys.addAll(dataSourceMap.keySet());
